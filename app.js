@@ -13,12 +13,15 @@
 const token = process.env.TEMPORARY_ACCESS_TOKEN;
 
 // Imports dependencies and set up http server
-const request = require("request"),
-  express = require("express"),
-  body_parser = require("body-parser"),
-  axios = require("axios").default,
-  app = express().use(body_parser.json()); // creates express http server
+const request = require("request");
+const express = require("express");
+const bodyParser = require("body-parser");
+const axios = require("axios").default;
+const cors = require("cors"); // Import cors middleware
+const app = express().use(bodyParser.json()); // creates express http server
 
+// Enable CORS
+app.use(cors());
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
 
