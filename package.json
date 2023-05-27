@@ -4,7 +4,8 @@
   "description": "An example webhook for WhatsApp Cloud API quick start tutorial.",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "build": "npm i"
   },
   "author": "WhatsApp",
   "license": "ISC",
