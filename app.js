@@ -13,7 +13,6 @@
 const token = process.env.TEMPORARY_ACCESS_TOKEN;
 
 // Imports dependencies and set up http server
-const request = require("request");
 const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios").default;
