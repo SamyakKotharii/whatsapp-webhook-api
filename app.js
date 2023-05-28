@@ -25,72 +25,52 @@ app.use(cors());
 app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
 
 // Accepts POST requests at /webhook endpoint
-// app.post("/webhook", (req, res) => {
-//   // Parse the request body from the POST
-//   let body = req.body;
+app.post("/webhook", (req, res) => {
+  // Parse the request body from the POST
+  let body = req.body;
 
-//   // Check the Incoming webhook message
-//   console.log(JSON.stringify(req.body, null, 2));
+  // Check the Incoming webhook message
+  console.log(JSON.stringify(req.body, null, 2));
 
-//   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-//   if (req.body.object) {
-//     if (
-//       req.body.entry &&
-//       req.body.entry[0].changes &&
-//       req.body.entry[0].changes[0] &&
-//       req.body.entry[0].changes[0].value.messages &&
-//       req.body.entry[0].changes[0].value.messages[0]
-//     ) {
-//       let phone_number_id =
-//         req.body.entry[0].changes[0].value.metadata.phone_number_id;
-//       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
-//       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-//       axios({
-//         method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-//         url:
-//           "https://graph.facebook.com/v12.0/" +
-//           phone_number_id +
-//           "/messages?access_token=" +
-//           token,
-//         data: {
-//           messaging_product: "whatsapp",
-//           to: from,
-//           text: { body: "Ack: " + msg_body },
-//         },
-//         headers: { "Content-Type": "application/json" },
-//       })
-//         .then((response) => {
-//           console.log("Response:", response.data);
-//           res.status(200).send(response.data);
-//         })
-//         .catch((error) => {
-//           console.error("An error occurred:", error);
-//         });
-//     }
-//     res.sendStatus(200);
-//   } else {
-//     // Return a '404 Not Found' if event is not from a WhatsApp API
-//     res.sendStatus(404);
-//   }
-// });
-// Accepts GET requests at the /webhook endpoint to receive messages
-app.get("/webhook", (req, res) => {
-  // Check if query parameters are present
-  if (req.query && req.query.phone_number && req.query.message) {
-    // Extract phone number and message from query parameters
-    const phoneNumber = req.query.phone_number;
-    const message = req.query.message;
-
-    // Log the received message
-    console.log("Received Message:");
-    console.log("From: " + phoneNumber);
-    console.log("Message: " + message);
-
-    // Send a 200 OK response
+  // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
+  if (req.body.object) {
+    if (
+      req.body.entry &&
+      req.body.entry[0].changes &&
+      req.body.entry[0].changes[0] &&
+      req.body.entry[0].changes[0].value.messages &&
+      req.body.entry[0].changes[0].value.messages[0]
+    ) {
+      let phone_number_id =
+        req.body.entry[0].changes[0].value.metadata.phone_number_id;
+      let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
+      let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
+      axios({
+        method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+        url:
+          "https://graph.facebook.com/v12.0/" +
+          phone_number_id +
+          "/messages?access_token=" +
+          token,
+        data: {
+          messaging_product: "whatsapp",
+          to: from,
+          text: { body: "Ack: " + msg_body },
+        },
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => {
+          console.log("Response:", response.data);
+          res.status(200).send(response.data);
+        })
+        .catch((error) => {
+          console.error("An error occurred:", error);
+        });
+    }
     res.sendStatus(200);
   } else {
-    // Return a '400 Bad Request' if required query parameters are missing
-    res.sendStatus(400);
+    // Return a '404 Not Found' if event is not from a WhatsApp API
+    res.sendStatus(404);
   }
 });
 
@@ -121,57 +101,3 @@ app.get("/webhook", (req, res) => {
     }
   }
 });
-
-// app.post("/webhook", (req, res) => {
-//   // Parse the request body from the POST
-//   let body = req.body;
-
-//   // Check the Incoming webhook message
-//   console.log(JSON.stringify(req.body, null, 2));
-
-//   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-//   if (req.body.object) {
-//     if (
-//       req.body.entry &&
-//       req.body.entry[0].changes &&
-//       req.body.entry[0].changes[0] &&
-//       req.body.entry[0].changes[0].value.messages &&
-//       req.body.entry[0].changes[0].value.messages[0]
-//     ) {
-//       let phone_number_id =
-//         req.body.entry[0].changes[0].value.metadata.phone_number_id;
-//       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
-//       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-//       axios({
-//         method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-//         url:
-//           "https://graph.facebook.com/v12.0/" +
-//           phone_number_id +
-//           "/messages?access_token=" +
-//           token,
-//         data: {
-//           messaging_product: "whatsapp",
-//           to: from,
-//           text: { body: "Ack: " + msg_body },
-//         },
-//         headers: { "Content-Type": "application/json" },
-//       })
-//         .then((response) => {
-//           const responseMessage = "Response: " + response.data;
-//           console.log(responseMessage);
-
-//           // Send the response message to the client
-//           res.status(200).send(responseMessage);
-//         })
-//         .catch((error) => {
-//           console.error("An error occurred:", error);
-//           res.sendStatus(500); // Send an appropriate status code in case of error
-//         });
-//     } else {
-//       res.sendStatus(200);
-//     }
-//   } else {
-//     // Return a '404 Not Found' if event is not from a WhatsApp API
-//     res.sendStatus(404);
-//   }
-// });
