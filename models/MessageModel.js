@@ -19,6 +19,10 @@ const messageSchema = new mongoose.Schema({
         type: Date,
         required: true,
       },
+      role: {
+        type: Number,
+        default: 0,
+      },
     },
   ],
 });
