@@ -14,107 +14,43 @@ app.use(cors());
 app.listen(process.env.PORT || 1337, () => {
   console.log("Webhook is listening");
 });
-// app.post("/webhook", (req, res) => {
-//   // Parse the request body from the POST
-//   let body = req.body;
 
-//   // Check the Incoming webhook message
-//   console.log(JSON.stringify(req.body, null, 2));
+// app.post("/send-message", async (req, res) => {
+//   try {
+//     // Extract the necessary data from the request body
+//     const { to, text } = req.body;
 
-//   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-//   if (req.body.object) {
-//     if (
-//       req.body.entry &&
-//       req.body.entry[0].changes &&
-//       req.body.entry[0].changes[0] &&
-//       req.body.entry[0].changes[0].value.messages &&
-//       req.body.entry[0].changes[0].value.messages[0]
-//     ) {
-//       let phone_number_id =
-//         req.body.entry[0].changes[0].value.metadata.phone_number_id;
-//       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
-//       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-//       axios({
-//         method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-//         url:
-//           "https://graph.facebook.com/v12.0/" +
-//           phone_number_id +
-//           "/messages?access_token=" +
-//           token,
-//         data: {
-//           messaging_product: "whatsapp",
-//           to: from,
-//           text: { body: "Ack: " + msg_body },
-//         },
-//         headers: { "Content-Type": "application/json" },
-//       })
-//         .then((response) => {
-//           console.log("Response:", response.data);
-//           res.status(200).send(response.data);
-//         })
-//         .catch((error) => {
-//           console.error("An error occurred:", error);
-//         });
-//     }
-//     res.sendStatus(200);
-//   } else {
-//     // Return a '404 Not Found' if event is not from a WhatsApp API
-//     res.sendStatus(404);
-//   }
-// });
-// // #2 code
-// app.post("/webhook", async (req, res) => {
-//   // Parse the request body from the POST
-//   let body = req.body;
-
-//   // Check the Incoming webhook message
-//   console.log(JSON.stringify(req.body, null, 2));
-
-//   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-//   if (req.body.object) {
-//     if (
-//       req.body.entry &&
-//       req.body.entry[0].changes &&
-//       req.body.entry[0].changes[0] &&
-//       req.body.entry[0].changes[0].value.messages &&
-//       req.body.entry[0].changes[0].value.messages[0]
-//     ) {
-//       let phone_number_id =
-//         req.body.entry[0].changes[0].value.metadata.phone_number_id;
-//       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
-//       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-
-//       try {
-//         // Create a new message object
-//         const message = new Message({
-//           from: from,
+//     // Create a new message object
+//     const newMessage = new Message({
+//       from: to,
+//       timestamp: new Date(),
+//       text: [
+//         {
+//           text: text.body,
 //           timestamp: new Date(),
-//           text: [{ text: msg_body }],
-//         });
+//           role: 1,
+//         },
+//       ],
+//     });
 
-//         // Save the message to the database
-//         await message.save();
+//     // Save the message to the database
+//     await newMessage.save();
 
-//         // Send acknowledgment message back to the sender
-//         await axios.post(
-//           `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
-//           {
-//             messaging_product: "whatsapp",
-//             to: from,
-//             text: { body: "Ack: " + msg_body },
-//           }
-//         );
-
-//         console.log("Message saved and acknowledgment sent");
-//         res.sendStatus(200);
-//       } catch (error) {
-//         console.error("An error occurred:", error);
-//         res.sendStatus(500);
+//     // Send acknowledgment message back to the sender
+//     await axios.post(
+//       `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+//       {
+//         messaging_product: "whatsapp",
+//         to: to,
+//         text: { body: text.body },
 //       }
-//     }
-//   } else {
-//     // Return a '404 Not Found' if event is not from a WhatsApp API
-//     res.sendStatus(404);
+//     );
+
+//     console.log("Message saved and acknowledgment sent");
+//     res.sendStatus(200);
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//     res.sendStatus(500);
 //   }
 // });
 app.post("/send-message", async (req, res) => {
@@ -122,21 +58,27 @@ app.post("/send-message", async (req, res) => {
     // Extract the necessary data from the request body
     const { to, text } = req.body;
 
-    // Create a new message object
-    const newMessage = new Message({
-      from: to,
-      timestamp: new Date(),
-      text: [
-        {
-          text: text.body,
-          timestamp: new Date(),
-          role: 1,
-        },
-      ],
-    });
+    // Find an existing message document by 'from' field
+    const existingMessage = await Message.findOne({ from: to });
 
-    // Save the message to the database
-    await newMessage.save();
+    if (existingMessage) {
+      // If an existing message is found, update the 'text' array
+      existingMessage.text.push({
+        text: text.body,
+        timestamp: new Date(),
+        role: 1,
+      });
+      existingMessage.timestamp = new Date();
+      await existingMessage.save();
+    } else {
+      // If no existing message is found, create a new message document
+      const newMessage = new Message({
+        from: to,
+        timestamp: new Date(),
+        text: [{ text: text.body, timestamp: new Date(), role: 1 }],
+      });
+      await newMessage.save();
+    }
 
     // Send acknowledgment message back to the sender
     await axios.post(
@@ -155,7 +97,6 @@ app.post("/send-message", async (req, res) => {
     res.sendStatus(500);
   }
 });
-
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
