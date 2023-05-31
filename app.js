@@ -144,7 +144,7 @@ app.post("/send-message", async (req, res) => {
       {
         messaging_product: "whatsapp",
         to: to,
-        text: { body: "Ack: " + text.body },
+        text: { body: text.body },
       }
     );
 
