@@ -117,6 +117,7 @@ app.listen(process.env.PORT || 1337, () => {
 //     res.sendStatus(404);
 //   }
 // });
+app.post("/whatsapp", async (req, res) => {});
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
