@@ -148,7 +148,7 @@ app.post("/webhook", async (req, res) => {
           // await existingMessage.save();
           const ts = new Date();
           existingMessage.text.push({ text: msg_body, timestamp: ts });
-          // existingMessage.timestamp = new Date();
+          existingMessage.timestamp = new Date();
           await existingMessage.save();
         } else {
           // If no existing message is found, create a new message document
