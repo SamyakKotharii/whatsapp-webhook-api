@@ -117,7 +117,45 @@ app.listen(process.env.PORT || 1337, () => {
 //     res.sendStatus(404);
 //   }
 // });
-app.post("/whatsapp", async (req, res) => {});
+app.post("/send-message", async (req, res) => {
+  try {
+    // Extract the necessary data from the request body
+    const { to, text } = req.body;
+
+    // Create a new message object
+    const newMessage = new Message({
+      from: to,
+      timestamp: new Date(),
+      text: [
+        {
+          text: text.body,
+          timestamp: new Date(),
+          role: 1,
+        },
+      ],
+    });
+
+    // Save the message to the database
+    await newMessage.save();
+
+    // Send acknowledgment message back to the sender
+    await axios.post(
+      `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+      {
+        messaging_product: "whatsapp",
+        to: to,
+        text: { body: "Ack: " + text.body },
+      }
+    );
+
+    console.log("Message saved and acknowledgment sent");
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("An error occurred:", error);
+    res.sendStatus(500);
+  }
+});
+
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
