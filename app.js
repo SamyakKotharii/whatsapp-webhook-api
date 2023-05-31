@@ -1,6 +1,7 @@
 "use strict";
 
-require("dotenv").config(); // Load environment variables
+const config = require("dotenv").config().parsed;
+// Load environment variables
 require("./db");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -95,7 +96,7 @@ app.post("/webhook", async (req, res) => {
 
         // Send acknowledgment message back to the sender
         await axios.post(
-          `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${token}`,
+          `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${config.ACCESS_TOKEN}`,
           {
             messaging_product: "whatsapp",
             to: from,
