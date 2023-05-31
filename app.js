@@ -155,7 +155,7 @@ app.post("/webhook", async (req, res) => {
           const newMessage = new Message({
             from: from,
             timestamp: new Date(),
-            text: [{ text: msg_body }],
+            text: [{ text: msg_body, timestamp: new Date() }],
           });
           await newMessage.save();
         }
