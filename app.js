@@ -144,7 +144,10 @@ app.post("/webhook", async (req, res) => {
 
         if (existingMessage) {
           // If an existing message is found, update the 'text' array
+          // existingMessage.text.push({ text: msg_body });
+          // await existingMessage.save();
           existingMessage.text.push({ text: msg_body });
+          existingMessage.timestamp = new Date();
           await existingMessage.save();
         } else {
           // If no existing message is found, create a new message document
