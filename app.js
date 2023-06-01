@@ -73,6 +73,16 @@ app.post("/send-message", async (req, res) => {
     res.sendStatus(500);
   }
 });
+//Get all Numbers
+app.get("/numbers", async (req, res) => {
+  try {
+    const numbers = await Message.distinct("from");
+    res.json(numbers);
+  } catch (error) {
+    console.error("An error occurred:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
