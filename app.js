@@ -14,45 +14,21 @@ app.use(cors());
 app.listen(process.env.PORT || 1337, () => {
   console.log("Webhook is listening");
 });
+// Add a new endpoint to get user data by 'from' variable
+app.get("/messages/:from", async (req, res) => {
+  try {
+    const from = req.params.from;
 
-// app.post("/send-message", async (req, res) => {
-//   try {
-//     // Extract the necessary data from the request body
-//     const { to, text } = req.body;
+    // Find the user's messages by 'from' field
+    const userMessages = await Message.find({ from });
 
-//     // Create a new message object
-//     const newMessage = new Message({
-//       from: to,
-//       timestamp: new Date(),
-//       text: [
-//         {
-//           text: text.body,
-//           timestamp: new Date(),
-//           role: 1,
-//         },
-//       ],
-//     });
+    res.status(200).json(userMessages);
+  } catch (error) {
+    console.error("An error occurred:", error);
+    res.sendStatus(500);
+  }
+});
 
-//     // Save the message to the database
-//     await newMessage.save();
-
-//     // Send acknowledgment message back to the sender
-//     await axios.post(
-//       `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
-//       {
-//         messaging_product: "whatsapp",
-//         to: to,
-//         text: { body: text.body },
-//       }
-//     );
-
-//     console.log("Message saved and acknowledgment sent");
-//     res.sendStatus(200);
-//   } catch (error) {
-//     console.error("An error occurred:", error);
-//     res.sendStatus(500);
-//   }
-// });
 app.post("/send-message", async (req, res) => {
   try {
     // Extract the necessary data from the request body
@@ -124,8 +100,6 @@ app.post("/webhook", async (req, res) => {
 
         if (existingMessage) {
           // If an existing message is found, update the 'text' array
-          // existingMessage.text.push({ text: msg_body });
-          // await existingMessage.save();
           const ts = new Date();
           existingMessage.text.push({ text: msg_body, timestamp: ts });
           existingMessage.timestamp = new Date();
