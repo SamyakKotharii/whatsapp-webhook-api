@@ -31,14 +31,10 @@ app.get("/messages/:from", async (req, res) => {
 
 app.post("/send-message", async (req, res) => {
   try {
-    // Extract the necessary data from the request body
     const { to, text } = req.body;
-
-    // Find an existing message document by 'from' field
     const existingMessage = await Message.findOne({ from: to });
 
     if (existingMessage) {
-      // If an existing message is found, update the 'text' array
       existingMessage.text.push({
         text: text.body,
         timestamp: new Date(),
@@ -47,7 +43,6 @@ app.post("/send-message", async (req, res) => {
       existingMessage.timestamp = new Date();
       await existingMessage.save();
     } else {
-      // If no existing message is found, create a new message document
       const newMessage = new Message({
         from: to,
         timestamp: new Date(),
@@ -55,8 +50,6 @@ app.post("/send-message", async (req, res) => {
       });
       await newMessage.save();
     }
-
-    // Send acknowledgment message back to the sender
     await axios.post(
       `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
       {
@@ -73,6 +66,7 @@ app.post("/send-message", async (req, res) => {
     res.sendStatus(500);
   }
 });
+
 //Get all Numbers
 app.get("/numbers", async (req, res) => {
   try {
@@ -83,7 +77,8 @@ app.get("/numbers", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-//Search Number
+
+//Search Number/Message
 app.get("/search/:key", async (req, res) => {
   const key = req.params.key;
 
