@@ -1,7 +1,6 @@
 "use strict";
 
 const config = require("dotenv");
-// Load environment variables
 require("./db");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -18,8 +17,6 @@ app.listen(process.env.PORT || 1337, () => {
 app.get("/messages/:from", async (req, res) => {
   try {
     const from = req.params.from;
-
-    // Find the user's messages by 'from' field
     const userMessages = await Message.find({ from });
 
     res.status(200).json(userMessages);
