@@ -26,6 +26,43 @@ app.get("/messages/:from", async (req, res) => {
   }
 });
 
+// app.post("/send-message", async (req, res) => {
+//   try {
+//     const { to, text } = req.body;
+//     const existingMessage = await Message.findOne({ from: to });
+
+//     if (existingMessage) {
+//       existingMessage.text.push({
+//         text: text.body,
+//         timestamp: new Date(),
+//         role: 1,
+//       });
+//       existingMessage.timestamp = new Date();
+//       await existingMessage.save();
+//     } else {
+//       const newMessage = new Message({
+//         from: to,
+//         timestamp: new Date(),
+//         text: [{ text: text.body, timestamp: new Date(), role: 1 }],
+//       });
+//       await newMessage.save();
+//     }
+//     await axios.post(
+//       `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+//       {
+//         messaging_product: "whatsapp",
+//         to: to,
+//         text: { body: text.body },
+//       }
+//     );
+
+//     console.log("Message saved and acknowledgment sent");
+//     res.sendStatus(200);
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//     res.sendStatus(500);
+//   }
+// });
 app.post("/send-message", async (req, res) => {
   try {
     const { to, text } = req.body;
@@ -47,19 +84,19 @@ app.post("/send-message", async (req, res) => {
       });
       await newMessage.save();
     }
-    await axios.post(
-      `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+
+    const response = await axios.post(
+      `https://graph.facebook.com/v12.0/me/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
       {
-        messaging_product: "whatsapp",
-        to: to,
-        text: { body: text.body },
+        recipient: { id: to },
+        message: { text: text.body },
       }
     );
 
     console.log("Message saved and acknowledgment sent");
     res.sendStatus(200);
   } catch (error) {
-    console.error("An error occurred:", error);
+    console.error("An error occurred:", error.response.data);
     res.sendStatus(500);
   }
 });
