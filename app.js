@@ -26,51 +26,6 @@ app.get("/messages/:from", async (req, res) => {
   }
 });
 
-// app.post("/send-message", async (req, res) => {
-//   try {
-//     const { to, text } = req.body;
-//     const existingMessage = await Message.findOne({ from: to });
-
-//     if (existingMessage) {
-//       existingMessage.text.push({
-//         text: text.body,
-//         timestamp: new Date(),
-//         role: 1,
-//       });
-//       existingMessage.timestamp = new Date();
-//       await existingMessage.save();
-//     } else {
-//       const newMessage = new Message({
-//         from: to,
-//         timestamp: new Date(),
-//         text: [{ text: text.body, timestamp: new Date(), role: 1 }],
-//       });
-//       await newMessage.save();
-//     }
-//     console.log("to is", to);
-//     console.log("message is", text.body);
-
-//     await axios.post(
-//       `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
-//       {
-//         messaging_product: "whatsapp",
-//         recipient_type: "individual", // Add recipient_type field
-//         to: to,
-//         type: "text", // Add type field
-//         text: {
-//           preview_url: false,
-//           body: text.body,
-//         },
-//       }
-//     );
-
-//     console.log("Message saved and acknowledgment sent");
-//     res.sendStatus(200);
-//   } catch (error) {
-//     console.error("An error occurred:", error);
-//     res.sendStatus(500);
-//   }
-// });
 app.post("/send-message", async (req, res) => {
   try {
     const { to, text } = req.body;
@@ -190,16 +145,16 @@ app.post("/webhook", async (req, res) => {
         }
 
         // Send acknowledgment message back to the sender
-        await axios.post(
-          `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
-          {
-            messaging_product: "whatsapp",
-            to: from,
-            text: { body: "Ack: " + msg_body },
-          }
-        );
+        // await axios.post(
+        //   `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+        //   {
+        //     messaging_product: "whatsapp",
+        //     to: from,
+        //     text: { body: "Ack: " + msg_body },
+        //   }
+        // );
 
-        console.log("Message saved and acknowledgment sent");
+        // console.log("Message saved and acknowledgment sent");
         res.sendStatus(200);
       } catch (error) {
         console.error("An error occurred:", error);
