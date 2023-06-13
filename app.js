@@ -47,12 +47,13 @@ app.post("/send-message", async (req, res) => {
       });
       await newMessage.save();
     }
+
     await axios.post(
       `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
       {
         messaging_product: "whatsapp",
         to: to,
-        text: { body: text.body },
+        text: text.body, // Update this line
       }
     );
 
