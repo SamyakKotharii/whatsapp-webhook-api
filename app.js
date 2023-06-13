@@ -66,6 +66,7 @@ app.get("/messages/:from", async (req, res) => {
 app.post("/send-message", async (req, res) => {
   try {
     const { to, text } = req.body;
+    const { body } = text;
     const existingMessage = await Message.findOne({ from: to });
 
     if (existingMessage) {
@@ -89,7 +90,7 @@ app.post("/send-message", async (req, res) => {
       `https://graph.facebook.com/v12.0/me/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
       {
         recipient: { id: to },
-        message: { text: text.body },
+        message: { text: body },
       }
     );
 
