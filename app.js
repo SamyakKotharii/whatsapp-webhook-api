@@ -77,35 +77,43 @@ app.post("/send-message", async (req, res) => {
     const existingMessage = await Message.findOne({ from: to });
 
     if (existingMessage) {
-      existingMessage.text.push({
-        text: text.body,
+      existingMessage.text = text.map((message) => ({
+        text: message.body,
         timestamp: new Date(),
         role: 1,
-      });
+      }));
       existingMessage.timestamp = new Date();
       await existingMessage.save();
     } else {
       const newMessage = new Message({
         from: to,
         timestamp: new Date(),
-        text: [{ text: text.body, timestamp: new Date(), role: 1 }],
+        text: text.map((message) => ({
+          text: message.body,
+          timestamp: new Date(),
+          role: 1,
+        })),
       });
       await newMessage.save();
     }
 
     console.log("to is", to);
-    console.log("message is", text.body);
+    console.log(
+      "message is",
+      text.map((message) => message.body)
+    );
 
     await axios.post(
-      `https://graph.facebook.com/v12.0/${PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+      `https://graph.facebook.com/v12.0/${process.env.PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
       {
-        messaging_type: "RESPONSE",
-        recipient: {
-          id: to,
-        },
-        message: {
-          text: text.body,
-        },
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: to,
+        type: "text",
+        text: text.map((message) => ({
+          preview_url: false,
+          body: message.body,
+        })),
       }
     );
 
