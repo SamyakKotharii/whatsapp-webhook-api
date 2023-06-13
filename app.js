@@ -75,7 +75,8 @@ app.post("/send-message", async (req, res) => {
   try {
     const { to, text } = req.body;
     const existingMessage = await Message.findOne({ from: to });
-
+    console.log("to is", to);
+    console.log("message is", text);
     if (existingMessage) {
       existingMessage.text.push({
         text: text.body,
