@@ -5,11 +5,11 @@ require("./db");
 const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios").default;
-const cors = require("cors");
 const Message = require("./models/MessageModel");
 const app = express().use(bodyParser.json());
-app.use(cors());
+const cors = require("cors");
 
+app.use(cors());
 app.listen(process.env.PORT || 1337, () => {
   console.log("Webhook is listening");
 });
@@ -96,7 +96,7 @@ app.post("/send-message", async (req, res) => {
     console.log("Message saved and acknowledgment sent");
     res.sendStatus(200);
   } catch (error) {
-    console.error("An error occurred:", error.response.data);
+    console.error("An error occurred:", error);
     res.sendStatus(500);
   }
 });
