@@ -97,7 +97,7 @@ app.post("/send-message", async (req, res) => {
     console.log("message is", text.body);
 
     await axios.post(
-      `https://graph.facebook.com/v12.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`,
+      `https://graph.facebook.com/v12.0/${PHONE_NUMBER_ID}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
       {
         messaging_type: "RESPONSE",
         recipient: {
