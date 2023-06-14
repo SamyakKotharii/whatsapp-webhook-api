@@ -84,6 +84,23 @@ app.get("/numbers", async (req, res) => {
 });
 
 //Search Number/Message
+// app.get("/search/:key", async (req, res) => {
+//   const key = req.params.key;
+
+//   try {
+//     const result = await Message.find({
+//       $or: [
+//         { from: { $regex: new RegExp(key, "i") } },
+//         { "text.text": { $regex: new RegExp(key, "i") } },
+//       ],
+//     });
+
+//     res.send(result);
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
 app.get("/search/:key", async (req, res) => {
   const key = req.params.key;
 
@@ -101,6 +118,7 @@ app.get("/search/:key", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
