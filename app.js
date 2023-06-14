@@ -13,7 +13,8 @@ app.use(cors());
 app.listen(process.env.PORT || 1337, () => {
   console.log("Webhook is listening");
 });
-// Add a new endpoint to get user data by 'from' variable
+
+// To get user message by mobile number
 app.get("/messages/:from", async (req, res) => {
   try {
     const from = req.params.from;
@@ -72,7 +73,7 @@ app.post("/send-message", async (req, res) => {
   }
 });
 
-//Get all Numbers
+//Get all mobile Numbers
 app.get("/numbers", async (req, res) => {
   try {
     const numbers = await Message.distinct("from");
@@ -83,24 +84,7 @@ app.get("/numbers", async (req, res) => {
   }
 });
 
-//Search Number/Message
-// app.get("/search/:key", async (req, res) => {
-//   const key = req.params.key;
-
-//   try {
-//     const result = await Message.find({
-//       $or: [
-//         { from: { $regex: new RegExp(key, "i") } },
-//         { "text.text": { $regex: new RegExp(key, "i") } },
-//       ],
-//     });
-
-//     res.send(result);
-//   } catch (error) {
-//     console.error("An error occurred:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
+//Search by message or phone number
 app.get("/search/:key", async (req, res) => {
   const key = req.params.key;
 
