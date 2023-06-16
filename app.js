@@ -74,9 +74,25 @@ app.post("/send-message", async (req, res) => {
 });
 
 //Get all mobile Numbers
+// app.get("/numbers", async (req, res) => {
+//   try {
+//     const numbers = await Message.distinct("from");
+//     res.json(numbers);
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 app.get("/numbers", async (req, res) => {
   try {
-    const numbers = await Message.distinct("from");
+    const sortedNumbers = await Message.aggregate([
+      { $sort: { timestamp: -1 } }, // Sort documents by timestamp in descending order
+      { $group: { _id: "$from", timestamp: { $first: "$timestamp" } } }, // Group by 'from' field and get the first timestamp
+      { $sort: { timestamp: -1 } }, // Sort again by timestamp in descending order
+    ]);
+
+    const numbers = sortedNumbers.map((item) => item._id); // Extract the 'from' field from each item
+
     res.json(numbers);
   } catch (error) {
     console.error("An error occurred:", error);
