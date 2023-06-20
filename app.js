@@ -173,6 +173,71 @@ app.get("/search/:key", async (req, res) => {
   }
 });
 
+// app.post("/webhook", async (req, res) => {
+//   // Parse the request body from the POST
+//   let body = req.body;
+
+//   // Check the Incoming webhook message
+//   console.log(JSON.stringify(req.body, null, 2));
+
+//   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
+//   if (req.body.object) {
+//     if (
+//       req.body.entry &&
+//       req.body.entry[0].changes &&
+//       req.body.entry[0].changes[0] &&
+//       req.body.entry[0].changes[0].value.messages &&
+//       req.body.entry[0].changes[0].value.messages[0]
+//     ) {
+//       let phone_number_id =
+//         req.body.entry[0].changes[0].value.metadata.phone_number_id;
+//       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
+//       let msg_body =
+//         req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.text?.body;
+//       // extract the message text from the webhook payload
+
+//       try {
+//         // Find an existing message document by 'from' field
+//         const existingMessage = await Message.findOne({ from });
+
+//         if (existingMessage) {
+//           // If an existing message is found, update the 'text' array
+//           const ts = new Date();
+//           existingMessage.text.push({ text: msg_body, timestamp: ts });
+//           existingMessage.timestamp = new Date();
+//           await existingMessage.save();
+//         } else {
+//           // If no existing message is found, create a new message document
+//           const newMessage = new Message({
+//             from: from,
+//             timestamp: new Date(),
+//             text: [{ text: msg_body, timestamp: new Date() }],
+//           });
+//           await newMessage.save();
+//         }
+
+//         // Send acknowledgment message back to the sender
+//         // await axios.post(
+//         //   `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
+//         //   {
+//         //     messaging_product: "whatsapp",
+//         //     to: from,
+//         //     text: { body: "Ack: " + msg_body },
+//         //   }
+//         // );
+
+//         // console.log("Message saved and acknowledgment sent");
+//         res.sendStatus(200);
+//       } catch (error) {
+//         console.error("An error occurred:", error);
+//         res.sendStatus(500);
+//       }
+//     }
+//   } else {
+//     // Return a '404 Not Found' if event is not from a WhatsApp API
+//     res.sendStatus(404);
+//   }
+// });
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
@@ -181,57 +246,35 @@ app.post("/webhook", async (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
 
   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-  if (req.body.object) {
-    if (
-      req.body.entry &&
-      req.body.entry[0].changes &&
-      req.body.entry[0].changes[0] &&
-      req.body.entry[0].changes[0].value.messages &&
-      req.body.entry[0].changes[0].value.messages[0]
-    ) {
-      let phone_number_id =
-        req.body.entry[0].changes[0].value.metadata.phone_number_id;
-      let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
-      let msg_body =
-        req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.text?.body;
-      // extract the message text from the webhook payload
+  if (req.body.message) {
+    const phone_number_id = req.body.metadata?.wabaId;
+    const from = req.body.message.from;
+    const msg_body = req.body.message.body;
 
-      try {
-        // Find an existing message document by 'from' field
-        const existingMessage = await Message.findOne({ from });
+    try {
+      // Find an existing message document by 'from' field
+      const existingMessage = await Message.findOne({ from });
 
-        if (existingMessage) {
-          // If an existing message is found, update the 'text' array
-          const ts = new Date();
-          existingMessage.text.push({ text: msg_body, timestamp: ts });
-          existingMessage.timestamp = new Date();
-          await existingMessage.save();
-        } else {
-          // If no existing message is found, create a new message document
-          const newMessage = new Message({
-            from: from,
-            timestamp: new Date(),
-            text: [{ text: msg_body, timestamp: new Date() }],
-          });
-          await newMessage.save();
-        }
-
-        // Send acknowledgment message back to the sender
-        // await axios.post(
-        //   `https://graph.facebook.com/v12.0/${phone_number_id}/messages?access_token=${process.env.TEMPORARY_ACCESS_TOKEN}`,
-        //   {
-        //     messaging_product: "whatsapp",
-        //     to: from,
-        //     text: { body: "Ack: " + msg_body },
-        //   }
-        // );
-
-        // console.log("Message saved and acknowledgment sent");
-        res.sendStatus(200);
-      } catch (error) {
-        console.error("An error occurred:", error);
-        res.sendStatus(500);
+      if (existingMessage) {
+        // If an existing message is found, update the 'text' array
+        const ts = new Date();
+        existingMessage.text.push({ text: msg_body, timestamp: ts });
+        existingMessage.timestamp = new Date();
+        await existingMessage.save();
+      } else {
+        // If no existing message is found, create a new message document
+        const newMessage = new Message({
+          from: from,
+          timestamp: new Date(),
+          text: [{ text: msg_body, timestamp: new Date() }],
+        });
+        await newMessage.save();
       }
+
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      res.sendStatus(500);
     }
   } else {
     // Return a '404 Not Found' if event is not from a WhatsApp API
