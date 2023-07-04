@@ -186,7 +186,7 @@ app.post("/webhook", async (req, res) => {
     const from = req.body.message.from;
     const msg_body = req.body.message.body;
     const name = req.body.message.profileName;
-    console.log("Profile name is", profileName);
+    console.log("Profile name is", name);
     try {
       // Find an existing message document by 'from' field
       const existingMessage = await Message.findOne({ from });
