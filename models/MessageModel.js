@@ -5,6 +5,9 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  profile: {
+    type: String,
+  },
   timestamp: {
     type: Date,
     required: true,

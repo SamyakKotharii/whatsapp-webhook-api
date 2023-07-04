@@ -201,6 +201,7 @@ app.post("/webhook", async (req, res) => {
         // If no existing message is found, create a new message document
         const newMessage = new Message({
           from: from,
+          profile: name,
           timestamp: new Date(),
           text: [{ text: msg_body, timestamp: new Date() }],
         });
