@@ -15,12 +15,37 @@ app.listen(process.env.PORT || 1337, () => {
 });
 
 // To get user message by mobile number
+// app.get("/messages/:from", async (req, res) => {
+//   try {
+//     const from = req.params.from;
+//     const userMessages = await Message.find({ from });
+
+//     res.status(200).json(userMessages);
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//     res.sendStatus(500);
+//   }
+// });
 app.get("/messages/:from", async (req, res) => {
   try {
     const from = req.params.from;
+
+    // Find the corresponding contact based on the 'from' number
+    const contact = await Contact.findOne({ from });
+
+    if (!contact) {
+      // Handle the case where the contact is not found
+      return res.status(404).json({ error: "Contact not found" });
+    }
+
+    // Find user messages using the 'from' number
     const userMessages = await Message.find({ from });
 
-    res.status(200).json(userMessages);
+    // Send the user messages along with the contact's name in the response
+    res.status(200).json({
+      contactName: contact.name,
+      messages: userMessages,
+    });
   } catch (error) {
     console.error("An error occurred:", error);
     res.sendStatus(500);
@@ -173,6 +198,53 @@ app.get("/search/:key", async (req, res) => {
   }
 });
 
+// app.post("/webhook", async (req, res) => {
+//   // Parse the request body from the POST
+//   let body = req.body;
+
+//   // Check the Incoming webhook message
+//   console.log(JSON.stringify(req.body, null, 2));
+
+//   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
+//   if (req.body.message) {
+//     const phone_number_id = req.body.metadata?.wabaId;
+//     const from = req.body.message.from;
+//     const msg_body = req.body.message.body;
+//     const name = req.body.message.profileName;
+//     console.log("Profile name is", name);
+//     try {
+//       // Find an existing message document by 'from' field
+//       const existingMessage = await Message.findOne({ from });
+
+//       if (existingMessage) {
+//         // If an existing message is found, update the 'text' array
+//         const ts = new Date();
+//         existingMessage.text.push({ text: msg_body, timestamp: ts });
+//         existingMessage.timestamp = new Date();
+//         await existingMessage.save();
+//       } else {
+//         // If no existing message is found, create a new message document
+//         const newMessage = new Message({
+//           from: from,
+//           profile: name,
+//           timestamp: new Date(),
+//           text: [{ text: msg_body, timestamp: new Date() }],
+//         });
+//         await newMessage.save();
+//       }
+
+//       res.sendStatus(200);
+//     } catch (error) {
+//       console.error("An error occurred:", error);
+//       res.sendStatus(500);
+//     }
+//   } else {
+//     // Return a '404 Not Found' if event is not from a WhatsApp API
+//     res.sendStatus(404);
+//   }
+// });
+
+//+ before
 app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
@@ -187,9 +259,13 @@ app.post("/webhook", async (req, res) => {
     const msg_body = req.body.message.body;
     const name = req.body.message.profileName;
     console.log("Profile name is", name);
+
+    // Add the plus sign (+) before the 'from' value
+    const formattedFrom = `+${from}`;
+
     try {
       // Find an existing message document by 'from' field
-      const existingMessage = await Message.findOne({ from });
+      const existingMessage = await Message.findOne({ from: formattedFrom });
 
       if (existingMessage) {
         // If an existing message is found, update the 'text' array
@@ -200,7 +276,7 @@ app.post("/webhook", async (req, res) => {
       } else {
         // If no existing message is found, create a new message document
         const newMessage = new Message({
-          from: from,
+          from: formattedFrom,
           profile: name,
           timestamp: new Date(),
           text: [{ text: msg_body, timestamp: new Date() }],
