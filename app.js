@@ -6,6 +6,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios").default;
 const Message = require("./models/MessageModel");
+const Contact = require("./models/ContactModel");
 const app = express().use(bodyParser.json());
 const cors = require("cors");
 
