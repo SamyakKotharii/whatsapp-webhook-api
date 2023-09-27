@@ -31,20 +31,18 @@ app.get("/messages/:from", async (req, res) => {
   try {
     const from = req.params.from;
 
-    // Find the corresponding contact based on the 'from' number
-    const contact = await Contact.findOne({ from });
-
-    if (!contact) {
-      // Handle the case where the contact is not found
-      return res.status(404).json({ error: "Contact not found" });
-    }
-
     // Find user messages using the 'from' number
     const userMessages = await Message.find({ from });
 
+    // Find the corresponding contact based on the 'from' number
+    const contact = await Contact.findOne({ from });
+
+    // If contact is not found, set contactName as the 'from' value
+    const contactName = contact ? contact.name : from;
+
     // Send the user messages along with the contact's name in the response
     res.status(200).json({
-      contactName: contact.name,
+      contactName: contactName,
       messages: userMessages,
     });
   } catch (error) {
