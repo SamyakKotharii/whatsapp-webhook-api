@@ -125,7 +125,6 @@ app.post("/send-message", async (req, res) => {
       wabaNumber: "917874990975",
       recipient: to,
       source: "",
-      clientRefId: "",
       type: "text",
       text: {
         preview_url: false,
